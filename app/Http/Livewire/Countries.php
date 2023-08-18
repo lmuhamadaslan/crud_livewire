@@ -10,7 +10,8 @@ class Countries extends Component
 {
     public $country_name, $capital_city, $continent;
     public $edit_country_name, $edit_capital_city, $edit_continent, $cid;
-    protected $listeners = ['delete'];
+    protected $listeners = ['delete','deleteCheckedCountries'];
+    public $checkedCountry = [];
     public function render()
     {
         return view('livewire.countries', [
@@ -48,6 +49,7 @@ class Countries extends Component
 
         if ($save) {
             $this->dispatchBrowserEvent('CloseModalAddCountry');
+            $this->checkedCountry = [];
         }
     }
 
@@ -87,6 +89,7 @@ class Countries extends Component
 
         if ($update) {
             $this->dispatchBrowserEvent('CloseModalUpdateCountry');
+            $this->checkedCountry = [];
         }
     }
 
@@ -105,5 +108,23 @@ class Countries extends Component
         if($del){
             $this->dispatchBrowserEvent('deleted');
         }
+        $this->checkedCountry = [];
+    }
+
+    public function deleteCountries(){
+        $this->dispatchBrowserEvent('swal:deleteCountries', [
+            'title' => 'Are You Sure?',
+            'html' => 'You want delete this countries',
+            'checkedIDs' => $this->checkedCountry
+        ]);
+    }
+
+    public function deleteCheckedCountries($ids){
+        Country::whereKey($ids)->delete();
+        $this->checkedCountry = [];
+    }
+
+    public function isChecked($countryId){
+        return in_array($countryId, $this->checkedCountry) ? 'bg-info text-white' : '';
     }
 }
